@@ -12,6 +12,10 @@ $version := "v23.03a"
 reqversion 2.6.25
 reqrecording
 
+$Debug := Truw
+
+#Mystic, and Netrunner 132x37
+
 # Load Command line Parameters.
 $Game := TWXPARAM[1]
 uppercase $Game
@@ -68,17 +72,17 @@ end
 # Initialize log file and status window.
 getDate $today
 write $logFile "* -=- " & $today & " -=- Starting BiGBang for Game" & $Game & "."
-$msg := "Let's get Rocked!"
-echo "**" $msg "**"
+$msg := "Let's get Rocked!*"
+echo "**~b" $msg "**"
 
 :Start
-    $msg := "Loging into server..."
+    $Head := "~DAutomated BigBang ~B" $version "~C by Micro and Claw!**"
+    $msg  &= "Loging into server...*"
     gosub :UpdateStatus
 
     if (CONNECTED)
         disconnect
     end
-
 
     killAllTriggers
     setDelayTrigger LTO :Start 60000
@@ -93,7 +97,7 @@ echo "**" $msg "**"
 
     :SelMenu
         #closeDataBase
-        $msg := "Deactivating Game..."
+        $msg &= "Deactivating Game...*"
         gosub :UpdateStatus
 
         killAllTriggers
@@ -109,9 +113,11 @@ echo "**" $msg "**"
         :Inactive
         send "n*q"
         goto :BigBang
- getconsoleinput $pause   
+  
     :BigBang
-        $msg := "Running BigBang..."
+ #getconsoleinput $pause     
+        $head &= "Running BigBang...*"
+        $msh := ""
         gosub :UpdateStatus 
 
         killAllTriggers
@@ -124,32 +130,45 @@ echo "**" $msg "**"
             send "r*" $UseSeed "*"
             waitFor "BigBang Setup"
         end
-
-        #Start BigBang
+getconsoleinput #pause
+#Sleep 1
+    #Start BigBang
+        setTextLineTrigger B1 :BigBangUpdate "Two Way Warp Lanes"
+        setTextLineTrigger B2 :BigBangUpdate "One Way Warp Lanes"
+        setTextLineTrigger B3 :BigBangUpdate "Linking Orphan Sectors"
+        setTextLineTrigger B4 :BigBangUpdate "Unaccessable Clusters"
+        setTextLineTrigger B5 :Bubbles     "Generating Bubble #1"
+        setTextLineTrigger B6 :MyBubbles   "holes in bubble"
+        setTextLineTrigger B7 :BubbleGates "Linking main sector"
+        setTextLineTrigger B8 :BigBangUpdate "Limiting Course Lengths"
+        setTextLineTrigger B9 :BigBangUpdate "Building Ports"
+        setTextLineTrigger B10 :BigBangUpdate "Scrambling Bubble Sectors"
+        setTextLineTrigger B11 :BigBangUpdate "Stocking Ports"
+        setTextLineTrigger B12 :BigBangUpdate "Exploding Nebulaes"
+        setTextLineTrigger B13 :WeresTheBeef "Beefing up "
+        setTextLineTrigger B14 :BigBangDone "This BigBang generation"
         send "z*"
-
-        setTextLineTrigger B1 :MyBubbles "holes in bubble"
-        setTextLineTrigger B2 :BubbleGates "Linking main sector"
-        setTextLineTrigger B3 :BigBangUpdate "Limiting Course Lengths"
-        setTextLineTrigger B4 :BigBangUpdate "Building Ports"
-        setTextLineTrigger B5 :BigBangUpdate "Scrambling Bubble Sectors"
-        setTextLineTrigger B6 :BigBangUpdate "Stocking Ports"
-        setTextLineTrigger B7 :BigBangUpdate "Exploding Nebulaes"
-        setTextLineTrigger Beef :WeresTheBeef "Beefing up "
-        setTextLineTrigger Done :BigBangDone "This BigBang generation"
         pause
+
+        :Bubbles     
+            $msg &= "Generating Bubbles.*"
+            gosub :UpdateStatus
+            pause
 
         :MyBubbles
-        setTextLineTrigger B1 :MyBubbles "holes in bubble"
-        pause
+            setTextLineTrigger B1 :MyBubbles "holes in bubble"
+            getTime $Now
+            write $logFile $Now & " - " & $msg
+            pause
 
-        :BubbleGate
-        setTextLineTrigger B2 :BubbleGates "Linking main sector"
-        pause
+        :BUBBLEGATES
+            setTextLineTrigger B2 :BubbleGates "Linking main sector"
+            getTime $Now
+            write $logFile $Now & " - " & $msg
+            pause
 
         :BigBangUpdate
-            $head := "Running BigBang..."
-            $msg  := CURRENTLINE
+            $msg  &= CURRENTLINE "*"
             gosub :UpdateStatus
             pause
 
@@ -158,34 +177,27 @@ echo "**" $msg "**"
             getWord CURRENTLINE $Rylos 4 
             getWord CURRENTLINE $Alpha 6 
             stripText $StarDock ","
-            $msg  := CURRENTLINE
+            $msg  &= CURRENTLINE "*"
             gosub :UpdateStatus
             pause
 
         :BigBangDone
-getconsoleinput $pause      
-            # This BigBang generation started at 09:49:35 AM and ended at 09:49:44 AM
-            getWord CURRENTLINE $BigBangStarted 6
-            getWord CURRENTLINE $AMPM 7
-            $BigBangStarted := $Today " " $BigBangStarted $AMPM           
-            getWord CURRENTLINE $BigBangEnded 11
-            getWord CURRENTLINE $AMPM 12
-            $BigBangEnded := $Today " " $BigBangEnded $AMPM 
-
-            $head := "BigBang Finished.."
-            getDateTime $BS $BigBangStarted
-            getDateTime $BE $BigBangEnded
-            DateTimeDiff $Minutes $BS $BE "Mins"
-            DateTimeDiff $Seconds $BS $BE "Secs"
-
-            if ($Minutes = 1)
-                $msg  := "Generated Universe in 1 Minute, and " $Seconds " Seconds."
-            elseif ($Minutes > 1)
-                $msg  := "Generated Universe in " $Minutes " Minutes, and " $Seconds " Seconds."
+            cutText CURRENTLINE $bbStart 36 11
+            cutText CURRENTLINE $bbEnd 61 11
+            dateTimeDiff $Diff $bbStart $bbEnd
+ 
+            if ($Diff.Minutes = 1)
+                $msg  &= "Generated Universe in 1 Minute, and " $Diff.Seconds " Seconds.*"
+            elseif ($Diff.Minutes > 1)
+                $msg  &= "Generated Universe in " $Diff.Minutes " Minutes, and " $Diff.Seconds " Seconds.*"
             else
-                $msg  := "Generated Universe in " $Seconds " Seconds."
+                $msg  &= "Generated Universe in " $Diff.Seconds " Seconds.*"
             end
             gosub :UpdateStatus
+
+$msg := ":"
+gosub :Debug
+getconsoleinput $pause 
 
             send "q"
             waitfor "Selection (? for menu):"
@@ -282,6 +294,22 @@ $WindowsIndex++
     if ($WinowMade <> True)
         $WinowMade := True
         window meow 600 400 "Meow" ONTOP
+        windowStyle meow "$FFFFFF" "$802020" "Courier New" 12
     end
-    $statsMsg &= $msg 
-    setwindowcontents meow "~F" $statsMsg
+
+    setwindowcontents meow "*  ~F" $Head "*    *~G" $msg "*"
+return
+
+
+:Debug
+    if ($Debug <> Truw)
+        return
+    end
+    window debug 600 400 "Meow" ONTOP
+    windowStyle debug "$FFFFFF" "$802020" "Courier New" 12
+
+    getTime $Now
+    write $logFile "DEBUG:" $Now & " - " & $msg
+    #setwindowcontents debug "*~G" $msg "*"
+    appendWindow debug "*~G" $msg "*"
+return
